@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>الكليات التقنية والمعاهد الصناعية</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body { margin:0; padding:0; font-family: Arial, sans-serif; }
+        #map { height: 100vh; width: 100%; }
+
+        .popup-content {
+            font-size: 14px;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .section-button, .specialization-button, .back-button {
+            border: none;
+            padding: 5px 10px;
+            margin: 3px 0;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            color:white;
+        }
+
+        .tooltip-label { 
+            background-color: white; 
+            padding: 3px 6px; 
+            border-radius: 4px; 
+            border: 1px solid #ccc; 
+            font-size: 12px; 
+            font-weight: bold;
+        }
+
+        #sidePanel {
+            position: absolute;
+            top: 50px;
+            right: -400px;
+            width: 350px;
+            max-height: 90%;
+            background-color: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            padding: 15px;
+            overflow-y: auto;
+            transition: right 0.4s ease;
+            z-index: 1000;
+            border-radius: 10px;
+        }
+        #sidePanel.open { right: 10px; }
+
+        .panel-button {
+            border: none;
+            padding: 7px 12px;
+            margin: 5px 2px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center; color:#0066cc;">الكليات التقنية والمعاهد الصناعية</h2>
+    <div id="map"></div>
+
+    <div id="sidePanel">
+        <div id="panelContent"></div>
+    </div>
+
+<script>
+var map = L.map('map').setView([24.5, 39.5], 7);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+function createColoredPin(color){
+    return L.divIcon({
+        className: "custom-pin",
+        html: `<svg width="24" height="36" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
+                 <path d="M12 0C7 0 3 4 3 9c0 7.5 9 27 9 27s9-19.5 9-27c0-5-4-9-9-9z" fill="${color}" stroke="#333333" stroke-width="1.5"/>
+                 <circle cx="12" cy="9" r="4" fill="white"/>
+               </svg>`,
+        iconSize: [24, 36],
+        iconAnchor: [12, 36],
+        popupAnchor: [0, -36]
+    });
+}
+
+var colleges = [
+/* ===================== 1 ===================== */
+{
+name:"الكلية التقنية بالمدينة المنورة",
+coords:[24.4816160, 39.7147494],
+color:"#0066cc",
+linkMaps:"https://maps.app.goo.gl/NLX7mNRbQTokcQMZ9?g_st=ic",
+linkX:"https://x.com/tvtc_g_med?lang=ar&ct=google-seo",
+description:"صرح تدريبي رائد يقدم برامج تقنية وتطبيقية في مجالات الهندسة، الحاسب، التقنية الإدارية، ويهدف لإعداد كوادر وطنية مؤهلة لسوق العمل الحديث مع مراعاة التطوير المهني المستمر للطلاب.",
+sections:[
+{name:"قسم التقنية الإدارية والمالية", specializations:["تقنية الأعمال المكتبية","تقنيات محاسبية","تقنية التسويق والابتكار"]},
+{name:"قسم التقنية الإلكترونية", specializations:["تقنية الإلكترونيات وأنظمة التحكم"]},
+{name:"قسم التقنية الكهربائية", specializations:["تقنية الآلات الكهربائية","تقنية القوى الكهربائية","تقنية الطاقة المتجددة"]},
+{name:"قسم التقنية الميكانيكية", specializations:["تقنية التبريد وتكييف الهواء"]},
+{name:"قسم الحاسب وتقنية المعلومات", specializations:["تقنية البرمجة وتطوير الويب","تقنية شبكات الحاسب","تقنية الدعم الفني للحاسب"]},
+{name:"قسم التقنية الخاصة", specializations:["تقنية التطبيقات المكتبية وصيانة الحاسب للمعوقين سمعياً"]}
+]
+},
+
+/* ===================== 2 ===================== */
+{
+name:"كلية السياحة والفندقة بالمدينة المنورة",
+coords:[24.4852440, 39.5910861],
+color:"#2e8b57",
+linkMaps:"https://maps.app.goo.gl/2r4EDAi7W4FBRg9X7?g_st=ic",
+linkX:"https://x.com/TVTC_G_MCTH",
+description:"كلية متخصصة في التدريب السياحي والفندقي وإدارة الضيافة والفعاليات، مع التركيز على تأهيل الطلاب وفق معايير الجودة العالمية والخبرة العملية في أماكن التدريب الفعلي.",
+sections:[
+{name:"قسم السياحة والضيافة", specializations:["انتاج الطعام الطهي","خدمة الطعام الضيافة","سفر وسياحة","إدارة فعاليات","فندقة"]}
+]
+},
+
+/* ===================== 3 ===================== */
+{
+name:"الكلية التقنية التطبيقية بينبع",
+coords:[24.1472865, 37.9472226],
+color:"#1e90ff",
+linkMaps:"https://maps.app.goo.gl/KtmTB5QjRzi6tUib9?g_st=ic",
+linkX:"https://x.com/tvtc_g_ycat?lang=ar",
+description:"كلية تطبيقية حديثة تخدم القطاع الصناعي بمدينة ينبع، وتقدم برامج متقدمة في الكهرباء، الميكانيكا، الحاسب، والإلكترونيات لتلبية احتياجات سوق العمل الصناعي.",
+sections:[
+{name:"قسم التقنية الكهربائية", specializations:["تقنية القوى الكهربائية (الشهادة الجامعية المتوسطة)","الآلات ومعدات كهربائية"]},
+{name:"قسم التقنية الميكانيكية", specializations:["تقنية تصنيع"]},
+{name:"قسم الحاسب وتقنية المعلومات", specializations:["تقنية البرمجة وتطوير الويب","تقنية الدعم الفني للحاسب","تقنية الوسائط المتعددة وتقنيات الويب"]},
+{name:"قسم التقنية الالكترونية", specializations:["تقنية الإلكترونات وأنظمة تحكم"]},
+{name:"قسم تقنية الاتصالات", specializations:["تقنية الاتصالات"]}
+]
+},
+
+/* ===================== 4 ===================== */
+{
+name:"الكلية التقنية بالعيص",
+coords:[25.0798118, 38.1415610],
+color:"#5dade2",
+linkMaps:"https://maps.app.goo.gl/gn42HEZCbZ4TbEns9?g_st=ic",
+linkX:"https://x.com/tvtc_g_aliss?lang=ar",
+description:"تخدم الكلية منطقة العيص ببرامج تقنية حديثة في الحاسب، الميكانيكا، والإلكترونيات، مع التركيز على التدريب العملي ومواكبة احتياجات السوق المحلي.",
+sections:[
+{name:"قسم الحاسب وتقنية المعلومات", specializations:["تقنية الدعم الفني للحاسب"]},
+{name:"قسم التقنية الألكترونية", specializations:["تقنية الألكترونيات وانظمة التحكم"]},
+{name:"قسم التقنية الإدارية والمالية", specializations:["تقنيات محاسبة"]}
+]
+},
+
+/* ===================== 5 ===================== */
+{
+name:"الكلية التقنية بخيبر",
+coords:[25.6216120, 39.3110910],
+color:"#708090",
+linkMaps:"https://maps.app.goo.gl/HYcZXCrx4VkjxW868?g_st=ic",
+linkX:"https://x.com/tvtc_g_kh?lang=ar",
+description:"توفر برامج تقنية متخصصة في الميكانيكا والحاسب، مع التركيز على صيانة المعدات والدعم الفني لضمان جاهزية الطلاب لسوق العمل.",
+sections:[
+{name:"قسم التقنية الميكانيكية", specializations:["تقنية الصيانة الميكانيكية"]},
+{name:"قسم الحاسب وتقنية المعلومات", specializations:["تقنية الدعم الفني للحاسب"]}
+]
+},
+
+/* ===================== 6 ===================== */
+{
+name:"الكلية التقنية بالحناكية",
+coords:[24.8560458, 40.5362409],
+color:"#3cb371",
+linkMaps:"https://maps.app.goo.gl/cR8eyaSxHmMzVn9H7?g_st=ic",
+linkX:"https://x.com/tvtc_g_hsii?lang=ar",
+description:"كلية تخدم منطقة الحناكية ببرامج تقنية متقدمة للبنين والبنات، وتشمل تخصصات الحاسب، الميكانيكا، والأعمال التطبيقية لتأهيل الكوادر.",
+sections:[
+{name:"بنين - قسم الحاسب وتقنية المعلومات", specializations:["تقنية الدعم الفني للحاسب"]},
+{name:"بنين - قسم التقنية الميكانيكية", specializations:["تقنية المحركات والمركبات"]},
+{name:"بنات (مشترك) - قسم تقنية الأعمال", specializations:["تقنية الموارد البشرية"]}
+]
+},
+
+/* ===================== 7 ===================== */
+{
+name:"المعهد الصناعي الثانوي بالحناكية",
+coords:[24.8477355, 40.5450144],
+color:"#2f4f4f",
+linkMaps:"https://maps.app.goo.gl/6APdZzoq3y7tiZbB9?g_st=ic",
+linkX:"https://x.com/tvtc_g_hsii?lang=ar",
+description:"معهد صناعي يقدم برامج تطبيقية متخصصة في الكهرباء والميكانيكا للطلاب، مع تدريب عملي مباشر على المعدات الصناعية.",
+sections:[
+{name:"قسم الكهرباء", specializations:["الكهرباء الإنشائية-شهادة الدبلوم الثانوي-ثانوي","الكهرباء الإنشائية-شهادة الدبلوم الثانوي-كفاءة"]},
+{name:"قسم الميكانيكا", specializations:["التبريد وتكييف الهواء-ثانوي","التبريد وتكييف الهواء-كفاءة","ميكانيكا السيارات-ثانوي","ميكانيكا السيارات-كفاءة"]}
+]
+},
+
+/* ===================== 8 ===================== */
+{
+name:"الكلية التقنية والمعهد الصناعي الثانوي ببدر",
+coords:[23.7583207, 38.7438263],
+color:"#4682b4",
+linkMaps:"https://maps.app.goo.gl/8wFKGkRbAFMW59e59?g_st=ic",
+linkX:"https://x.com/tvtc_g_badr?lang=ar",
+description:"مجمع تعليمي تدريبي يخدم محافظة بدر، يقدم برامج تقنية وصناعية تشمل الحاسب، الميكانيكا، والكهرباء الصناعية، مع تدريب عملي مستمر.",
+sections:[
+{name:"قسم الحاسب الالي", specializations:["تقنية الدعم الفني للحاسب","تقنية شبكات الحاسب"]},
+{name:"قسم التقنية الميكانيكية", specializations:["تقنية المحركات والمركبات"]},
+{name:"المعهد الصناعي الثانوي ببدر", specializations:["الكهرباء الإنشائية-كفاءة","اللحام-كفاءة","تبريد وتكييف-كفاءة"]}
+]
+},
+
+/* ===================== 9 ===================== */
+{
+name:"الكلية التقنية والمعهد الصناعي الثانوي بالمهد",
+coords:[23.4921256, 40.8925680],
+color:"#87cefa",
+linkMaps:"https://maps.app.goo.gl/DazBjycUCnJpThqQ8?g_st=ic",
+linkX:"https://x.com/tvtc_g_mahd?lang=ar",
+description:"تقدم برامج تقنية وصناعية متخصصة للطلاب في الحاسب، الميكانيكا والكهرباء، مع التركيز على التدريب العملي لتأهيل الكوادر لسوق العمل.",
+sections:[
+{name:"قسم الحاسب الآلي", specializations:["دعم فني"]},
+{name:"قسم الميكانيكا", specializations:["تقنية المحركات ومركبات"]},
+{name:"المعهد الصناعي بالمهد", specializations:["التبريد وتكييف الهواء-ثانوي","التبريد وتكييف الهواء-كفاءة","الكهرباء الصناعية-كفاءة"]}
+]
+},
+
+/* ===================== 10 ===================== */
+{
+name:"الكلية التقنية والمعهد الصناعي الثانوي بالعلا",
+coords:[26.6707061, 37.9095010],
+color:"#20b2aa",
+linkMaps:"https://maps.app.goo.gl/VzPXMHPTdK78dEAw7?g_st=ic",
+linkX:"https://x.com/tvtc_g_alula?lang=ar",
+description:"تخدم محافظة العلا ببرامج تقنية وسياحية متخصصة، وتوفر التدريب العملي في الحاسب، الميكانيكا، السياحة والضيافة لتأهيل الكوادر.",
+sections:[
+{name:"قسم التقنية الإدارية والمالية", specializations:["تقنية الاعمال المكتبية"]},
+{name:"قسم التقنية الميكانيكية", specializations:["تقنية المحركات والمركبات"]},
+{name:"قسم الحاسب وتقنية المعلومات", specializations:["تقنية إدارة أنظمة الشبكات"]},
+{name:"قسم تقنية السياحة والضيافة", specializations:["إدارة الفعاليات","الفندقة"]},
+{name:"المعهد الصناعي بالعلا", specializations:["التبريد وتكييف الهواء-كفاءة","مكانيكا السيارات-كفاءة"]}
+]
+},
+
+/* ===================== 11 ===================== */
+{
+name:"الكلية التقنية للبنات بالمدينة المنورة",
+coords:[24.5195649, 39.6731996],
+color:"#8a2be2",
+linkMaps:"https://maps.app.goo.gl/sCxsQdp6do3UUf4v5?g_st=ic",
+linkX:"https://x.com/tvtc_f_madinah?lang=ar",
+description:"كلية نسائية متخصصة تقدم برامج تقنية ومهنية متنوعة للطالبات، تشمل التجميل، الأعمال المكتبية، الحاسب، وتصميم الأزياء مع تدريب عملي.",
+sections:[
+{name:"قسم تقنية التزيين النسائي", specializations:["تقنية العناية بالشعر","تقنية التجميل والعناية بالبشرة"]},
+{name:"قسم تقنية الاعمال", specializations:["تقنيات الاعمال المكتبية"]},
+{name:"قسم الحاسب وتقنية المعلومات", specializations:["تقنية الوسائط المتعددة وتقنيات الويب"]},
+{name:"قسم تقنية تصميم وتصنيع الازياء", specializations:["انتاج وتصنيع الازياء","تقنية الموضة والتصميم"]}
+]
+},
+
+/* ===================== 12 ===================== */
+{
+name:"الكلية التقنية للبنات بينبع",
+coords:[24.0392524, 38.1837472],
+color:"#ff69b4",
+linkMaps:"https://maps.app.goo.gl/L6i5uBu9e7Mn4Ve38?g_st=ic",
+linkX:"https://x.com/tvtc_f_ynb?lang=ar",
+description:"تقدم برامج تقنية متخصصة للطالبات في ينبع، تشمل الحاسب، الأعمال، السياحة وتصميم الأزياء، مع تدريب عملي لتأهيل الطالبات.",
+sections:[
+{name:"قسم الحاسب وتقنية المعلومات", specializations:["الوسائط المتعددة وتقنيات الويب"]},
+{name:"قسم تقنية الاعمال", specializations:["تقنيات التأمين والمخاطر"]},
+{name:"قسم السياحة والضيافة", specializations:["السياحة والسفر"]},
+{name:"قسم تصميم وتصنيع الأزياء", specializations:["تقنية الموضة وتصميم الأزياء","خياطة وانتاج الملابس"]}
+]
+},
+
+/* ===================== 13 ===================== */
+{
+name:"المعهد الصناعي الثانوي الأول بالمدينة",
+coords:[24.4138058, 39.5279285],
+color:"#696969",
+linkMaps:"https://maps.app.goo.gl/VfXL8pnnSHXetjk97?g_st=ic",
+linkX:"https://x.com/tvtc_m_med1?lang=ar",
+description:"معهد صناعي مهني يقدم تدريب تطبيقي في الكهرباء، اللحام، ميكانيكا السيارات، وتشغيل آلات الإنتاج لتأهيل الطلاب لسوق العمل الصناعي.",
+sections:[
+{name:"قسم الكهرباء الصناعية", specializations:["شهادة الدبلوم الثانوي-كفاءة"]},
+{name:"قسم اللحام", specializations:["شهادة الدبلوم الثانوي-كفاءة"]},
+{name:"قسم تشغيل آلات الإنتاج", specializations:["شهادة الدبلوم الثانوي-كفاءة"]},
+{name:"قسم ميكانيكا السيارات", specializations:["شهادة الدبلوم الثانوي-كفاءة"]}
+]
+},
+
+/* ===================== 14 ===================== */
+{
+name:"المعهد الصناعي الثانوي الثاني بالمدينة",
+coords:[24.4831432, 39.7191083],
+color:"#483d8b",
+linkMaps:"https://maps.app.goo.gl/X7VJGpycxU1dYKbq8?g_st=ic",
+linkX:"https://x.com/tvtc_m_med2?lang=ar",
+description:"معهد صناعي يقدم برامج تدريبية متقدمة في الكهرباء، الميكانيكا، والحاسب مع التركيز على التدريب العملي لتأهيل الطلاب.",
+sections:[
+{name:"قسم الحاسب الآلي", specializations:["شهادة الدبلوم الثانوي-كفاءة"]},
+{name:"قسم الكهرباء الإنشائية", specializations:["شهادة الدبلوم الثانوي-كفاءة"]},
+{name:"قسم تبريد وتكييف", specializations:["شهادة الدبلوم الثانوي-كفاءة"]},
+{name:"قسم تشغيل آلات إنتاج", specializations:["شهادة الدبلوم الثانوي-كفاءة"]},
+{name:"قسم ميكانيكا السيارات", specializations:["شهادة الدبلوم الثانوي-كفاءة"]}
+]
+}
+
+];
+
+colleges.forEach(function(college){
+    var marker = L.marker(college.coords, {
+        title: college.name,
+        icon: createColoredPin(college.color)
+    }).addTo(map);
+
+    L.tooltip({
+        permanent:true,
+        direction:'top',
+        className:'tooltip-label'
+    })
+    .setContent(`<span style="color:${college.color};">${college.name}</span>`)
+    .setLatLng(college.coords)
+    .addTo(map);
+
+    marker.on('click', function(){
+        showSections(college);
+        openSidePanel(college);
+    });
+});
+
+function showSections(college){
+    var popupContent = `<div class="popup-content" style="border-top:4px solid ${college.color};">
+                            <h3 style="color:${college.color}">${college.name}</h3><br>`;
+    college.sections.forEach(function(section,index){
+        popupContent += `<button class="section-button" style="background:${college.color};"
+        onclick="showSpecializations(${index},${colleges.indexOf(college)})">${section.name}</button><br>`;
+    });
+    popupContent += `</div>`;
+    L.popup().setLatLng(college.coords).setContent(popupContent).openOn(map);
+}
+
+function showSpecializations(sectionIndex,collegeIndex){
+    var college = colleges[collegeIndex];
+    var section = college.sections[sectionIndex];
+    var content = `<div class="popup-content" style="border-top:4px solid ${college.color};">
+                       <h3 style="color:${college.color}">${section.name}</h3><br>`;
+    section.specializations.forEach(function(spec){
+        content += `<div class="specialization-button" style="background:${college.color};">${spec}</div><br>`;
+    });
+    content += `<br><button class="back-button" style="background:${college.color};"
+    onclick="showSections(colleges[${collegeIndex}])">← العودة للأقسام</button></div>`;
+    L.popup().setLatLng(college.coords).setContent(content).openOn(map);
+}
+
+function openSidePanel(college){
+    var panel = document.getElementById('sidePanel');
+
+    var content = `
+    <button class="panel-button" style="background:${college.color};width:100%;" onclick="closeSidePanel()">× إغلاق</button>
+    <h3 style="color:${college.color}">${college.name}</h3>
+    <p>${college.description}</p>
+    <button class="panel-button" style="background:${college.color};width:48%;" onclick="window.open('${college.linkMaps}')">Google Maps</button>
+    <button class="panel-button" style="background:${college.color};width:48%;" onclick="window.open('${college.linkX}')">منصة X</button>
+    `;
+
+    document.getElementById('panelContent').innerHTML = content;
+    panel.classList.add('open');
+}
+
+function closeSidePanel(){
+    document.getElementById('sidePanel').classList.remove('open');
+}
+</script>
+</body>
+</html>
